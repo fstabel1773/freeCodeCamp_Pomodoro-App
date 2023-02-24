@@ -16,6 +16,7 @@ function App() {
           setBreakLength(prevBreakLength => prevBreakLength + 1)
         }} else if (sessionLength < 60) {
           setSessionLength(prevSessionLength => prevSessionLength + 1)
+          setTimeLeft(prevTimeLeft => prevTimeLeft + 60)
         }
   }
 
@@ -26,6 +27,7 @@ function App() {
           setBreakLength(prevBreakLength => prevBreakLength - 1)
         }} else if (sessionLength > 0) {
           setSessionLength(prevSessionLength => prevSessionLength - 1)
+          setTimeLeft(prevTimeLeft => prevTimeLeft - 60)
         }
   }
 
@@ -38,6 +40,7 @@ function App() {
     return timeFormatted
   }
 
+  const title = countdownType === "SESSION" ? "Session" : "Break";
 
   return (
     <div className="vh-100 d-flex justify-content-center align-items-center bg-warning">
@@ -95,12 +98,14 @@ function App() {
         </div>
 
         <div className="w-50 mx-auto my-3 py-4 border border-4 border-dark rounded-3">
-          <h4 id="timer-label" className="text-center">Session</h4>
+          <h4 id="timer-label" className="text-center">
+            {title}
+          </h4>
           <h1 id="time-left" className="text-center">
             {timeFormatter(timeLeft)}
           </h1>
         </div>
- 
+
         <div className="btn-toolbar w-50 mx-auto my-3" role="toolbar" aria-label="Toolbar with button groups">
           <div className="btn-group btn-group-lg mr-2 mx-auto" role="group" aria-label="First group">
             <button id="start_stop" type="button" className="btn btn-dark text-warning">
