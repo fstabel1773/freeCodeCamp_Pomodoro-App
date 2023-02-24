@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 
 
@@ -9,26 +9,117 @@ function App() {
   const [countdownType, setCountdownType] = useState("SESSION")
   const [isRunning, setIsRunning] = useState(false)
 
-  function handleIncrement(event) {
-    if (event.target.id === "break-increment"
-      || event.target.parentElement.id === "break-increment") {
-        if (breakLength < 60) {
-          setBreakLength(prevBreakLength => prevBreakLength + 1)
-        }} else if (sessionLength < 60) {
-          setSessionLength(prevSessionLength => prevSessionLength + 1)
-          setTimeLeft(prevTimeLeft => prevTimeLeft + 60)
-        }
+  const beep = useRef()
+
+  const defaultBreakLength = 5
+  const defaultSessionLength = 25
+  const defaultTimeLeft = defaultSessionLength * 60
+
+  // function handleIncrement(event) {
+  //   console.log(event.target.parentElement)
+  //   if ((event.target.id === "break-increment"
+  //     || event.target.parentElement.id === "break-increment")
+  //     && breakLength < 60) {
+  //       setBreakLength(prevBreakLength => prevBreakLength + 1)
+  //     }
+  //   if ((event.target.id === "session-increment"
+  //     || event.target.parentElement.id === "session-increment")  
+  //     && sessionLength < 60) {
+  //       setSessionLength(prevSessionLength => prevSessionLength + 1)
+  //       setTimeLeft(prevTimeLeft => prevTimeLeft + 60)
+  //     }
+  // }
+
+  // function handleDecrement(event) {
+  //   console.log(event.target.parentElement)
+  //   if ((event.target.id === "break-decrement"
+  //     || event.target.parentElement.id === "break-decrement")
+  //     && breakLength > 1) {
+  //       setBreakLength(prevBreakLength => prevBreakLength - 1)
+  //     }
+  //   if ((event.target.id === "session-decrement"
+  //     || event.target.parentElement.id === "session-decrement")  
+  //     && sessionLength > 1) {
+  //       setSessionLength(prevSessionLength => prevSessionLength - 1)
+  //       setTimeLeft(prevTimeLeft => prevTimeLeft - 60)
+  //     }
+  // }
+
+
+  function handleBreakIncrement() {
+    if(breakLength < 60){
+      setBreakLength(breakLength + 1)
+    }
+  }
+  
+  function handleBreakDecrement() {
+    if(breakLength > 1){
+      setBreakLength(breakLength - 1)
+    }
+  }
+  
+   function handleSessionIncrement() {
+    if(sessionLength < 60){
+      setSessionLength(sessionLength + 1)
+    }
+  }
+  
+  function handleSessionDecrement() {
+    if(sessionLength > 1){
+      setSessionLength(sessionLength - 1)
+    }
   }
 
-  function handleDecrement(event) {
-    if (event.target.id === "break-decrement"
-      || event.target.parentElement.id === "break-decrement") {
-        if (breakLength > 0) {
-          setBreakLength(prevBreakLength => prevBreakLength - 1)
-        }} else if (sessionLength > 0) {
-          setSessionLength(prevSessionLength => prevSessionLength - 1)
-          setTimeLeft(prevTimeLeft => prevTimeLeft - 60)
-        }
+  useEffect(() => {
+    countdownType === "SESSION" ? setTimeLeft(sessionLength * 60) : setTimeLeft(breakLength * 60)
+  }, [sessionLength])
+
+  function handleStartStop() {
+    clearTimeout(timeOut)
+    setIsRunning(prevIsRunning => !prevIsRunning)
+  }
+
+  function countdown() {
+    if (isRunning) {
+      timeOut
+      resetByTimeout()
+    } else {
+      clearTimeout(timeOut)
+    }
+  }
+
+  const timeOut = setTimeout(() => {
+    if (timeLeft >= 0 && isRunning)
+      setTimeLeft(prevTimeLeft => prevTimeLeft - 1)
+    }, 1000)
+
+  useEffect(() => {
+    countdown(),
+    [isRunning, timeLeft, timeOut]
+  })
+
+
+  function resetByTimeout() {
+    
+    if (timeLeft === -1 && countdownType === "SESSION") {
+      setCountdownType("BREAK")
+      setTimeLeft(prevTimeLeft => prevTimeLeft + 1 + breakLength * 60)
+      beep.current.play()
+    } else if (timeLeft === -1 && countdownType === "BREAK") {
+      setCountdownType("SESSION")
+      setTimeLeft(prevTimeLeft => prevTimeLeft + 1 + sessionLength * 60)
+    }
+  }
+
+  function reset() {
+    clearTimeout(timeOut)
+    setIsRunning(false)
+    setTimeLeft(defaultTimeLeft)
+    setBreakLength(defaultBreakLength)
+    setSessionLength(defaultSessionLength)
+    setCountdownType("SESSION")
+    beep.current.pause()
+    beep.current.currentTime = 0;
   }
 
   function timeFormatter(seconds) {
@@ -57,7 +148,8 @@ function App() {
             <div className='d-flex align-items-center justify-content-center'>
               <button 
                 id="break-decrement" 
-                onClick={handleDecrement}
+                onClick={handleBreakDecrement}
+                disabled={isRunning}
                 className="btn btn-lg btn-dark text-warning">
                 <i className="bi bi-arrow-down-square"></i>
               </button>
@@ -66,7 +158,8 @@ function App() {
               </h3>
               <button 
                 id="break-increment"
-                onClick={handleIncrement}
+                onClick={handleBreakIncrement}
+                disabled={isRunning}
                 className="btn btn-lg btn-dark text-warning">
                 <i className="bi bi-arrow-up-square"></i>
               </button>
@@ -80,7 +173,8 @@ function App() {
             <div className='d-flex align-items-center justify-content-center'>
               <button 
                 id="session-decrement" 
-                onClick={handleDecrement}
+                onClick={handleSessionDecrement}
+                disabled={isRunning}
                 className="btn btn-lg btn-dark text-warning">
                 <i className="bi bi-arrow-down-square"></i>
               </button>
@@ -89,7 +183,8 @@ function App() {
               </h3>
               <button 
                 id="session-increment"
-                onClick={handleIncrement}
+                onClick={handleSessionIncrement}
+                disabled={isRunning}
                 className="btn btn-lg btn-dark text-warning">
                 <i className="bi bi-arrow-up-square"></i>
               </button>
@@ -108,16 +203,27 @@ function App() {
 
         <div className="btn-toolbar w-50 mx-auto my-3" role="toolbar" aria-label="Toolbar with button groups">
           <div className="btn-group btn-group-lg mr-2 mx-auto" role="group" aria-label="First group">
-            <button id="start_stop" type="button" className="btn btn-dark text-warning">
-              <i className="bi bi-play-fill"></i>
-              <i className="bi bi-pause-fill"></i>
+            <button id="start_stop" 
+              type="button" 
+              className="btn btn-dark text-warning"
+              onClick={handleStartStop}>
+                <i className="bi bi-play-fill"></i>
+                <i className="bi bi-pause-fill"></i>
             </button>
-            <button id="reset" type="button" className="btn btn-dark text-warning border-start">
+            <button id="reset" 
+              type="button" 
+              className="btn btn-dark text-warning border-start"
+              onClick={reset}>
               <i className="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </div>
 
+        <audio id="beep"
+          preload="auto"
+          src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav" 
+          ref={beep}>
+        </audio>
 
       </div>
     </div>
