@@ -1,4 +1,4 @@
-# freeCodeCamp_DrumMachine
+# freeCodeCamp_Pomodoro-Clock-App
 Pomodoro-Clock-App -- solo project from freeCodeCamp frontend course
 
 This repo contains the last of five required solo projects from freeCodeCamp Front End Development Libraries course.
