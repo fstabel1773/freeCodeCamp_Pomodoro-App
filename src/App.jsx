@@ -15,37 +15,6 @@ function App() {
   const defaultSessionLength = 25
   const defaultTimeLeft = defaultSessionLength * 60
 
-  // function handleIncrement(event) {
-  //   console.log(event.target.parentElement)
-  //   if ((event.target.id === "break-increment"
-  //     || event.target.parentElement.id === "break-increment")
-  //     && breakLength < 60) {
-  //       setBreakLength(prevBreakLength => prevBreakLength + 1)
-  //     }
-  //   if ((event.target.id === "session-increment"
-  //     || event.target.parentElement.id === "session-increment")  
-  //     && sessionLength < 60) {
-  //       setSessionLength(prevSessionLength => prevSessionLength + 1)
-  //       setTimeLeft(prevTimeLeft => prevTimeLeft + 60)
-  //     }
-  // }
-
-  // function handleDecrement(event) {
-  //   console.log(event.target.parentElement)
-  //   if ((event.target.id === "break-decrement"
-  //     || event.target.parentElement.id === "break-decrement")
-  //     && breakLength > 1) {
-  //       setBreakLength(prevBreakLength => prevBreakLength - 1)
-  //     }
-  //   if ((event.target.id === "session-decrement"
-  //     || event.target.parentElement.id === "session-decrement")  
-  //     && sessionLength > 1) {
-  //       setSessionLength(prevSessionLength => prevSessionLength - 1)
-  //       setTimeLeft(prevTimeLeft => prevTimeLeft - 60)
-  //     }
-  // }
-
-
   function handleBreakIncrement() {
     if(breakLength < 60){
       setBreakLength(breakLength + 1)
@@ -74,6 +43,7 @@ function App() {
     countdownType === "SESSION" ? setTimeLeft(sessionLength * 60) : setTimeLeft(breakLength * 60)
   }, [sessionLength])
 
+
   function handleStartStop() {
     clearTimeout(timeOut)
     setIsRunning(prevIsRunning => !prevIsRunning)
@@ -100,7 +70,6 @@ function App() {
 
 
   function resetByTimeout() {
-    
     if (timeLeft === -1 && countdownType === "SESSION") {
       setCountdownType("BREAK")
       setTimeLeft(prevTimeLeft => prevTimeLeft + 1 + breakLength * 60)
@@ -133,19 +102,24 @@ function App() {
 
   const title = countdownType === "SESSION" ? "Session" : "Break";
 
+  const styles = countdownType === "BREAK" 
+    ? {color:"#0ead69"} 
+    : timeLeft < 60 
+    ? {color: "#EF233C"} 
+    : {}
+
   return (
-    <div className="vh-100 d-flex justify-content-center align-items-center bg-warning">
-      <div id="App-Wrapper" className="p-5 border border-5 border-dark rounded w-50">
+    <div className="vh-100 d-flex flex-column justify-content-center align-items-center bg-warning">
+      <h1 className="text-center text-uppercase mb-4 fw-bold display-6"><span>🍅</span><span>Pomodoro-</span><span>Clock</span> <span>🍅</span></h1>
+      <div id="App-Wrapper" className="mx-5 p-3 w-75 border border-5 border-dark rounded">
 
-        <h1 className="col text-center">Pomodoro-Clock</h1>
-
-        <div className="break-session-length">
-          <div className="">
+        <div className="d-flex flex-column flex-sm-row justify-content-sm-around">
+          <div className="my-3">
             <h3 id="break-label" 
               className="text-center">
               Break Length
             </h3>
-            <div className='d-flex align-items-center justify-content-center'>
+            <div className="d-flex align-items-center justify-content-center">
               <button 
                 id="break-decrement" 
                 onClick={handleBreakDecrement}
@@ -165,7 +139,7 @@ function App() {
               </button>
             </div>
           </div>
-          <div className="">
+          <div className="my-3">
             <h3 id="session-label" 
               className="text-center">
               Session Length
@@ -196,23 +170,25 @@ function App() {
           <h4 id="timer-label" className="text-center">
             {title}
           </h4>
-          <h1 id="time-left" className="text-center">
-            {timeFormatter(timeLeft)}
+          <h1 id="time-left" 
+            className="text-center"
+            style={styles}>
+              {timeFormatter(timeLeft)}
           </h1>
         </div>
 
         <div className="btn-toolbar w-50 mx-auto my-3" role="toolbar" aria-label="Toolbar with button groups">
-          <div className="btn-group btn-group-lg mr-2 mx-auto" role="group" aria-label="First group">
+          <div className="btn-group btn-group-lg mr-2 mx-auto text-wrap" role="group" aria-label="First group">
             <button id="start_stop" 
               type="button" 
-              className="btn btn-dark text-warning"
+              className="btn btn-dark text-warning text-nowrap"
               onClick={handleStartStop}>
                 <i className="bi bi-play-fill"></i>
                 <i className="bi bi-pause-fill"></i>
             </button>
             <button id="reset" 
               type="button" 
-              className="btn btn-dark text-warning border-start"
+              className="btn btn-dark text-warning"
               onClick={reset}>
               <i className="bi bi-arrow-clockwise"></i>
             </button>
